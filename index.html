@@ -5,229 +5,210 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>오늘 뭐 먹지? 🍽️</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    min-height: 100vh;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: #fdf6f2;
-    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-    padding: 2rem 1rem;
-  }
-  .title-area { text-align: center; margin-bottom: 1.5rem; }
-  .title-area h1 { font-size: 24px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
-  .title-area p { font-size: 14px; color: #888; }
-
-  .scene { position: relative; width: 300px; height: 390px; margin-bottom: 1.5rem; }
-  .card-face {
-    position: absolute; inset: 0; border-radius: 16px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 1.5rem; border: 1px solid #e8ddd8;
-    background: #fff; overflow: hidden;
-    box-shadow: 0 4px 24px rgba(216,90,48,0.08);
-    transition: opacity 0.4s ease, transform 0.4s ease;
-  }
-  .card-back { cursor: pointer; user-select: none; opacity: 1; transform: scale(1); z-index: 2; }
-  .card-front { opacity: 0; transform: scale(0.96); z-index: 1; pointer-events: none; }
-  .scene.flipped .card-back  { opacity: 0; transform: scale(0.96); pointer-events: none; z-index: 1; }
-  .scene.flipped .card-front { opacity: 1; transform: scale(1); pointer-events: auto; z-index: 2; }
-
-  .card-back-pattern {
-    position: absolute; inset: 0; border-radius: 16px;
-    background:
-      repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(216,90,48,0.06) 12px, rgba(216,90,48,0.06) 13px),
-      repeating-linear-gradient(-45deg, transparent, transparent 12px, rgba(216,90,48,0.06) 12px, rgba(216,90,48,0.06) 13px);
-  }
-  .card-back-inner { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-  .orb {
-    width: 88px; height: 88px; border-radius: 50%;
-    background: #FAECE7; border: 2px solid #F0997B;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 40px; animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(216,90,48,0.2); }
-    50% { transform: scale(1.06); box-shadow: 0 0 0 12px rgba(216,90,48,0); }
-  }
-  .tap-hint { font-size: 15px; color: #993C1D; font-weight: 600; }
-  .tap-sub { font-size: 12px; color: #aaa; }
-
-  .menu-emoji { font-size: 64px; line-height: 1; margin-bottom: 8px; }
-  .menu-cat { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #aaa; margin-bottom: 6px; text-transform: uppercase; }
-  .menu-name { font-size: 28px; font-weight: 700; color: #1a1a1a; text-align: center; margin-bottom: 12px; }
-  .menu-reason {
-    font-size: 14px; color: #666; text-align: center; line-height: 1.65;
-    padding: 10px 14px; background: #fdf6f2;
-    border-radius: 10px; width: 100%;
-  }
-  .menu-reason em { font-style: normal; color: #993C1D; font-weight: 600; }
-
-  .btn-row { display: flex; gap: 10px; }
-  .btn {
-    height: 44px; padding: 0 22px; border-radius: 10px;
-    border: 1px solid #e0d5d0; background: #fff; color: #333;
-    font-size: 14px; cursor: pointer; font-family: inherit;
-    transition: background 0.15s; white-space: nowrap; font-weight: 500;
-  }
-  .btn:hover { background: #fdf6f2; }
-  .btn.primary { background: #D85A30; color: #fff; border-color: #D85A30; }
-  .btn.primary:hover { background: #993C1D; border-color: #993C1D; }
-
-  .char-wrap { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: 16px; }
-  .particle { position: absolute; font-size: 20px; animation: floatUp 1.2s ease-out forwards; opacity: 0; }
-  @keyframes floatUp {
-    0% { opacity: 1; transform: translateY(0) scale(1); }
-    100% { opacity: 0; transform: translateY(-80px) scale(0.5); }
-  }
-  .count-badge { font-size: 12px; color: #bbb; margin-top: 10px; }
-
-  @media (prefers-color-scheme: dark) {
-    body { background: #1e1510; }
-    .card-face { background: #2a1e18; border-color: #3d2e26; box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
-    .menu-name { color: #f5ede8; }
-    .menu-reason { background: #1e1510; color: #b09080; }
-    .btn { background: #2a1e18; color: #f5ede8; border-color: #3d2e26; }
-    .btn:hover { background: #332319; }
-    .title-area h1 { color: #f5ede8; }
-  }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fdf6f2;font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;padding:2rem 1rem;}
+.app{width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center;gap:0;}
+.step{width:100%;display:none;flex-direction:column;align-items:center;gap:1rem;}
+.step.active{display:flex;}
+.step-header{text-align:center;}
+.step-header h1{font-size:22px;font-weight:600;color:#1a1a1a;margin-bottom:4px;}
+.step-header p{font-size:14px;color:#888;}
+.step-indicator{display:flex;gap:6px;margin-bottom:1.2rem;}
+.dot{width:7px;height:7px;border-radius:50%;background:#e0d5d0;}
+.dot.on{background:#D85A30;}
+.mood-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;}
+.mood-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 8px;border-radius:14px;border:1px solid #e0d5d0;background:#fff;cursor:pointer;transition:border-color .15s,background .15s;}
+.mood-btn:hover{background:#fdf6f2;}
+.mood-btn.sel{border:2px solid #D85A30;background:#FAECE7;}
+.mood-btn .micon{font-size:30px;line-height:1;}
+.mood-btn .mlabel{font-size:14px;font-weight:600;color:#1a1a1a;}
+.mood-btn .msub{font-size:11px;color:#999;text-align:center;}
+.cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%;}
+.cat-btn{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:14px;border:1px solid #e0d5d0;background:#fff;cursor:pointer;transition:border-color .15s,background .15s;}
+.cat-btn:hover{background:#fdf6f2;}
+.cat-btn.sel{border:2px solid #D85A30;background:#FAECE7;}
+.cat-btn .cicon{font-size:22px;}
+.cat-btn .clabel{font-size:14px;font-weight:600;color:#1a1a1a;}
+.next-btn{width:100%;height:46px;border-radius:12px;border:none;background:#D85A30;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s;}
+.next-btn:hover{background:#993C1D;}
+.next-btn:disabled{background:#ddd;color:#aaa;cursor:not-allowed;}
+.result-wrap{width:100%;}
+.scene{position:relative;width:100%;height:370px;margin-bottom:1rem;}
+.card-face{position:absolute;inset:0;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;border:1px solid #e8ddd8;background:#fff;overflow:hidden;box-shadow:0 4px 20px rgba(216,90,48,.08);transition:opacity .4s ease,transform .4s ease;}
+.card-back{cursor:pointer;user-select:none;opacity:1;transform:scale(1);z-index:2;}
+.card-front{opacity:0;transform:scale(.96);z-index:1;pointer-events:none;}
+.scene.flipped .card-back{opacity:0;transform:scale(.96);pointer-events:none;z-index:1;}
+.scene.flipped .card-front{opacity:1;transform:scale(1);pointer-events:auto;z-index:2;}
+.card-pattern{position:absolute;inset:0;border-radius:16px;background:repeating-linear-gradient(45deg,transparent,transparent 12px,rgba(216,90,48,.06) 12px,rgba(216,90,48,.06) 13px),repeating-linear-gradient(-45deg,transparent,transparent 12px,rgba(216,90,48,.06) 12px,rgba(216,90,48,.06) 13px);}
+.card-back-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:12px;}
+.orb{width:84px;height:84px;border-radius:50%;background:#FAECE7;border:2px solid #F0997B;display:flex;align-items:center;justify-content:center;font-size:38px;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(216,90,48,.2);}50%{transform:scale(1.06);box-shadow:0 0 0 10px rgba(216,90,48,0);}}
+.tap-hint{font-size:15px;color:#993C1D;font-weight:600;}
+.tap-sub{font-size:12px;color:#aaa;text-align:center;padding:0 8px;}
+.menu-emoji{font-size:62px;line-height:1;margin-bottom:8px;}
+.menu-cat-badge{font-size:11px;font-weight:600;letter-spacing:.07em;color:#aaa;margin-bottom:4px;text-transform:uppercase;}
+.menu-name{font-size:28px;font-weight:700;color:#1a1a1a;margin-bottom:10px;}
+.menu-reason{font-size:13px;color:#666;text-align:center;line-height:1.65;padding:10px 12px;background:#fdf6f2;border-radius:10px;width:100%;}
+.menu-reason em{font-style:normal;color:#993C1D;font-weight:600;}
+.mood-tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:4px 12px;border-radius:20px;margin-top:10px;font-weight:500;}
+.mood-tag.bad{background:#FAECE7;color:#993C1D;}
+.mood-tag.ok{background:#FAEEDA;color:#633806;}
+.mood-tag.good{background:#EAF3DE;color:#27500A;}
+.btn-row{display:flex;gap:8px;width:100%;}
+.btn{flex:1;height:44px;border-radius:10px;border:1px solid #e0d5d0;background:#fff;color:#333;font-size:14px;cursor:pointer;font-family:inherit;transition:background .15s;font-weight:500;}
+.btn:hover{background:#fdf6f2;}
+.btn.primary{background:#D85A30;color:#fff;border-color:#D85A30;}
+.btn.primary:hover{background:#993C1D;}
+.char-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:16px;}
+.particle{position:absolute;font-size:18px;animation:floatUp 1.2s ease-out forwards;opacity:0;}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1);}100%{opacity:0;transform:translateY(-80px) scale(.5);}}
+@media(prefers-color-scheme:dark){body{background:#1e1510;}.step-header h1,.mood-btn .mlabel,.cat-btn .clabel,.menu-name{color:#f5ede8;}.card-face{background:#2a1e18;border-color:#3d2e26;}.mood-btn,.cat-btn,.btn{background:#2a1e18;border-color:#3d2e26;color:#f5ede8;}.mood-btn:hover,.cat-btn:hover,.btn:hover{background:#332319;}.menu-reason{background:#1e1510;color:#b09080;}.tap-sub{color:#8a6a5a;}}
 </style>
 </head>
 <body>
+<div class="app">
+  <div class="step-indicator">
+    <div class="dot on" id="d1"></div>
+    <div class="dot" id="d2"></div>
+    <div class="dot" id="d3"></div>
+  </div>
 
-<div class="title-area">
-  <h1>오늘 뭐 먹지? 🍽️</h1>
-  <p>카드를 눌러 오늘의 메뉴를 뽑아보세요</p>
-</div>
-
-<div class="scene" id="scene">
-  <div class="card-face card-back" onclick="flipCard()">
-    <div class="card-back-pattern"></div>
-    <div class="card-back-inner">
-      <div class="orb">🍴</div>
-      <div class="tap-hint">오늘의 메뉴 뽑기</div>
-      <div class="tap-sub">탭하여 확인</div>
+  <div class="step active" id="step1">
+    <div class="step-header">
+      <h1>오늘 기분이 어때요?</h1>
+      <p>기분에 맞는 메뉴로 연결해 드려요</p>
     </div>
-    <div class="char-wrap" id="particles"></div>
+    <div class="mood-grid">
+      <div class="mood-btn" onclick="selMood('bad')" id="m-bad">
+        <div class="micon">😩</div>
+        <div class="mlabel">꿀꿀</div>
+        <div class="msub">자극적인 메뉴</div>
+      </div>
+      <div class="mood-btn" onclick="selMood('ok')" id="m-ok">
+        <div class="micon">😐</div>
+        <div class="mlabel">보통</div>
+        <div class="msub">무난한 메뉴</div>
+      </div>
+      <div class="mood-btn" onclick="selMood('good')" id="m-good">
+        <div class="micon">😊</div>
+        <div class="mlabel">좋음</div>
+        <div class="msub">가볍고 담백</div>
+      </div>
+    </div>
+    <button class="next-btn" id="btn1" onclick="goStep2()" disabled>다음 →</button>
   </div>
-  <div class="card-face card-front">
-    <div class="menu-emoji" id="mEmoji"></div>
-    <div class="menu-cat" id="mCat"></div>
-    <div class="menu-name" id="mName"></div>
-    <div class="menu-reason" id="mReason"></div>
-  </div>
-</div>
 
-<div class="btn-row">
-  <button class="btn" onclick="resetCard()">다시 뽑기</button>
-  <button class="btn primary" onclick="shareIt()">동료에게 공유</button>
+  <div class="step" id="step2">
+    <div class="step-header">
+      <h1>어제 뭐 먹었어요?</h1>
+      <p>같은 계열은 제외하고 추천해 드려요</p>
+    </div>
+    <div class="cat-grid">
+      <div class="cat-btn" onclick="selCat('면류')" id="c-면류"><span class="cicon">🍜</span><span class="clabel">면류</span></div>
+      <div class="cat-btn" onclick="selCat('밥·찌개')" id="c-밥·찌개"><span class="cicon">🍚</span><span class="clabel">밥·찌개</span></div>
+      <div class="cat-btn" onclick="selCat('튀김·구이')" id="c-튀김·구이"><span class="cicon">🍗</span><span class="clabel">튀김·구이</span></div>
+      <div class="cat-btn" onclick="selCat('분식·패스트푸드')" id="c-분식·패스트푸드"><span class="cicon">🍕</span><span class="clabel">분식·패스트푸드</span></div>
+      <div class="cat-btn" onclick="selCat('건강식·기타')" id="c-건강식·기타"><span class="cicon">🥗</span><span class="clabel">건강식·기타</span></div>
+      <div class="cat-btn" onclick="selCat('기억안남')" id="c-기억안남"><span class="cicon">🤔</span><span class="clabel">기억 안 남</span></div>
+    </div>
+    <button class="next-btn" id="btn2" onclick="goStep3()" disabled>메뉴 뽑으러 가기 →</button>
+  </div>
+
+  <div class="step" id="step3">
+    <div class="result-wrap">
+      <div class="scene" id="scene">
+        <div class="card-face card-back" onclick="flipCard()">
+          <div class="card-pattern"></div>
+          <div class="card-back-inner">
+            <div class="orb">🍴</div>
+            <div class="tap-hint">오늘의 메뉴 뽑기</div>
+            <div class="tap-sub" id="filter-info"></div>
+          </div>
+          <div class="char-wrap" id="particles"></div>
+        </div>
+        <div class="card-face card-front">
+          <div class="menu-emoji" id="mEmoji"></div>
+          <div class="menu-cat-badge" id="mCat"></div>
+          <div class="menu-name" id="mName"></div>
+          <div class="menu-reason" id="mReason"></div>
+          <div class="mood-tag" id="moodTag"></div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="resetAll()">↩ 처음부터</button>
+        <button class="btn" onclick="reroll()">🎲 다시 뽑기</button>
+        <button class="btn primary" onclick="shareIt()">공유</button>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="count-badge">총 50가지 메뉴</div>
 
 <script>
-const menus = [
-  { emoji:"🍜", cat:"면류", name:"짜장면", reason:"오늘 기분이 까매도 괜찮아. 짜장이 다 <em>덮어줄게</em>" },
-  { emoji:"🌶️", cat:"면류", name:"짬뽕", reason:"얼큰한 국물 한 숟갈이면 오전 스트레스 <em>증발</em>" },
-  { emoji:"🔪", cat:"면류", name:"칼국수", reason:"칼처럼 날카로운 오후를 위한 <em>부드러운 준비</em>" },
-  { emoji:"🍜", cat:"면류", name:"라면", reason:"회사에서 먹는 라면은 집보다 두 배 맛있음. <em>과학적 사실</em>" },
-  { emoji:"🍃", cat:"면류", name:"냉면", reason:"시원한 한 젓가락으로 오후 졸음을 <em>날려버리자</em>" },
-  { emoji:"🍥", cat:"면류", name:"우동", reason:"따뜻하고 순한 당신에게 <em>딱 맞는</em> 오늘의 메뉴" },
-  { emoji:"🌿", cat:"면류", name:"막국수", reason:"시원하고 고소하게, 오늘 하루도 <em>쭉쭉 뻗어나가자</em>" },
-  { emoji:"🎉", cat:"면류", name:"잔치국수", reason:"잔치는 없어도 국수는 있잖아. 오늘 <em>그걸로 충분해</em>" },
-  { emoji:"🌾", cat:"면류", name:"쌀국수", reason:"가볍고 깔끔하게. 오후까지 속이 <em>편한 선택</em>" },
-  { emoji:"🥗", cat:"밥·찌개", name:"비빔밥", reason:"인생도 비빔밥처럼. 다 섞으면 <em>맛있어진다</em>" },
-  { emoji:"🔥", cat:"밥·찌개", name:"돌솥비빔밥", reason:"바닥 누룽지까지 긁어먹는 그 행복, <em>오늘의 당신 것</em>" },
-  { emoji:"🌶️", cat:"밥·찌개", name:"김치찌개", reason:"빨간 김치찌개 한 그릇이면 오후 회의도 <em>문제없어</em>" },
-  { emoji:"🍄", cat:"밥·찌개", name:"된장찌개", reason:"구수하고 든든하게. 오늘도 <em>묵직하게 버텨보자</em>" },
-  { emoji:"🥘", cat:"밥·찌개", name:"부대찌개", reason:"오늘은 다 때려넣고 시작하는 날. <em>부대찌개처럼</em>" },
-  { emoji:"🤍", cat:"밥·찌개", name:"순두부찌개", reason:"부드럽게, 하지만 속은 <em>뜨겁게</em>" },
-  { emoji:"🍖", cat:"밥·찌개", name:"갈비탕", reason:"갈비탕 한 그릇은 점심이 아니라 <em>투자야</em>" },
-  { emoji:"🥛", cat:"밥·찌개", name:"설렁탕", reason:"뽀얀 국물 한 그릇으로 속을 달래주는 <em>어른의 점심</em>" },
-  { emoji:"🍲", cat:"밥·찌개", name:"곰탕", reason:"말 없이 묵묵하게 끓인 국물. <em>당신 같아서</em> 선택했어" },
-  { emoji:"🫕", cat:"밥·찌개", name:"순대국밥", reason:"든든하고 서민적인 당신의 점심. <em>줄 서도 후회 없음</em>" },
-  { emoji:"🌱", cat:"밥·찌개", name:"콩나물국밥", reason:"해장이 필요한 건 아니지만… <em>그냥 몸이 원하는 날</em>" },
-  { emoji:"🥬", cat:"밥·찌개", name:"쌈밥", reason:"싸서 먹는 즐거움. 오늘 점심은 <em>내가 포장하는 날</em>" },
-  { emoji:"🔥", cat:"밥·찌개", name:"제육볶음", reason:"매콤하게 볶아진 돼지고기처럼 오후도 <em>불태우자</em>" },
-  { emoji:"🍯", cat:"밥·찌개", name:"불고기", reason:"달콤하고 부드럽게. 오늘만큼은 <em>여유롭게 가자</em>" },
-  { emoji:"🥓", cat:"밥·찌개", name:"삼겹살", reason:"삼겹살은 그냥 먹는 게 아니라 <em>충전하는 거야</em>" },
-  { emoji:"🍗", cat:"밥·찌개", name:"닭볶음탕", reason:"뼈 발라 먹는 수고로움이 있어야 <em>진짜 맛이지</em>" },
-  { emoji:"💛", cat:"밥·찌개", name:"청국장", reason:"냄새는 강해도 속은 따뜻하게. <em>오늘 나처럼</em>" },
-  { emoji:"🌊", cat:"밥·찌개", name:"해물뚝배기", reason:"바다의 기운을 받아 오후도 <em>시원하게 헤엄쳐가자</em>" },
-  { emoji:"🐔", cat:"튀김·구이", name:"치킨", reason:"치킨은 항상 옳다. <em>더 이상의 설명은 필요 없음</em>" },
-  { emoji:"🥩", cat:"튀김·구이", name:"돈까스", reason:"두드려 맞아도 맛있어지는 돈까스. <em>오늘의 당신처럼</em>" },
-  { emoji:"🍬", cat:"튀김·구이", name:"탕수육", reason:"부먹이든 찍먹이든 오늘만큼은 <em>싸우지 말자</em>" },
-  { emoji:"🌶️", cat:"튀김·구이", name:"닭갈비", reason:"매콤하게 볶아지면서 더 맛있어지는 거야. <em>당신처럼</em>" },
-  { emoji:"🐟", cat:"튀김·구이", name:"생선구이정식", reason:"비린내 없이 담백하게. 오늘 하루도 <em>그렇게 가자</em>" },
-  { emoji:"🦆", cat:"튀김·구이", name:"오리구이", reason:"겉은 여유롭게, 발은 열심히. <em>오늘의 당신 스타일</em>" },
-  { emoji:"🥢", cat:"튀김·구이", name:"두부김치", reason:"두부처럼 부드럽고 김치처럼 강하게. <em>오늘의 나</em>" },
-  { emoji:"❤️", cat:"분식", name:"떡볶이", reason:"매콤달콤한 인생처럼. 오늘도 <em>쫄깃하게 버텨</em>" },
-  { emoji:"🟢", cat:"분식", name:"김밥", reason:"한 줄에 인생이 다 들어있어. 오늘도 <em>잘 말려보자</em>" },
-  { emoji:"⚫", cat:"분식", name:"순대", reason:"소금에 찍어 먹는 순대처럼, <em>심플하게 가는 날</em>" },
-  { emoji:"🍕", cat:"분식·패스트푸드", name:"피자", reason:"오늘은 조각내서 나눠 먹는 게 <em>정답인 날</em>" },
-  { emoji:"🍔", cat:"분식·패스트푸드", name:"햄버거", reason:"빠르게 먹고 빠르게 충전. <em>오후도 빠르게 달려</em>" },
-  { emoji:"🥪", cat:"분식·패스트푸드", name:"샌드위치", reason:"가볍게 먹고 가볍게 움직이자. <em>오늘의 모토</em>" },
-  { emoji:"🌯", cat:"분식·패스트푸드", name:"부리또", reason:"꽉 채워 싸맨 부리또처럼 오늘도 <em>알차게 채워보자</em>" },
-  { emoji:"🐙", cat:"분식·패스트푸드", name:"타코야키", reason:"동글동글 귀엽지만 속은 뜨겁게 꽉 차있어. <em>당신처럼</em>" },
-  { emoji:"🌭", cat:"분식·패스트푸드", name:"핫도그", reason:"간단하지만 확실한 만족. <em>오늘 점심의 진리</em>" },
-  { emoji:"🥗", cat:"건강식·기타", name:"샐러드", reason:"내 몸에게 미안했던 날들을 <em>오늘 하루 갚아보자</em>" },
-  { emoji:"🍣", cat:"건강식·기타", name:"초밥·스시", reason:"하나하나 정성스럽게. 오늘 오후도 <em>그렇게 하면 돼</em>" },
-  { emoji:"🍝", cat:"건강식·기타", name:"파스타", reason:"알덴테처럼 딱 적당하게. 오늘도 <em>그렇게만 해</em>" },
-  { emoji:"🌶️", cat:"건강식·기타", name:"마라탕", reason:"입을 마비시키면 스트레스도 <em>같이 마비됨</em>" },
-  { emoji:"🌺", cat:"건강식·기타", name:"포케", reason:"하와이 직장인처럼 오늘 하루 <em>여유롭게 가보자</em>" },
-  { emoji:"🐟", cat:"건강식·기타", name:"연어덮밥", reason:"빠르고 맛있게. 오늘 점심은 <em>효율이 최고야</em>" },
-  { emoji:"🥩", cat:"건강식·기타", name:"소고기덮밥", reason:"도쿄 직장인도 이렇게 먹었어. <em>나쁠 리 없잖아</em>" },
+const ALL_MENUS=[
+  {emoji:"🍜",cat:"면류",name:"짜장면",mood:["bad","ok"],reason:"오늘 기분이 까매도 괜찮아. 짜장이 다 <em>덮어줄게</em>"},
+  {emoji:"🌶️",cat:"면류",name:"짬뽕",mood:["bad"],reason:"얼큰한 국물 한 숟갈이면 오전 스트레스 <em>증발</em>"},
+  {emoji:"🔪",cat:"면류",name:"칼국수",mood:["ok","good"],reason:"칼처럼 날카로운 오후를 위한 <em>부드러운 준비</em>"},
+  {emoji:"🍜",cat:"면류",name:"라면",mood:["bad","ok"],reason:"회사에서 먹는 라면은 집보다 두 배 맛있음. <em>과학적 사실</em>"},
+  {emoji:"🍃",cat:"면류",name:"냉면",mood:["ok","good"],reason:"시원한 한 젓가락으로 오후 졸음을 <em>날려버리자</em>"},
+  {emoji:"🍥",cat:"면류",name:"우동",mood:["ok","good"],reason:"따뜻하고 순한 당신에게 <em>딱 맞는</em> 오늘의 메뉴"},
+  {emoji:"🌿",cat:"면류",name:"막국수",mood:["ok","good"],reason:"시원하고 고소하게, 오늘 하루도 <em>쭉쭉 뻗어나가자</em>"},
+  {emoji:"🎉",cat:"면류",name:"잔치국수",mood:["ok","good"],reason:"잔치는 없어도 국수는 있잖아. 오늘 <em>그걸로 충분해</em>"},
+  {emoji:"🌾",cat:"면류",name:"쌀국수",mood:["ok","good"],reason:"가볍고 깔끔하게. 오후까지 속이 <em>편한 선택</em>"},
+  {emoji:"🥗",cat:"밥·찌개",name:"비빔밥",mood:["ok","good"],reason:"인생도 비빔밥처럼. 다 섞으면 <em>맛있어진다</em>"},
+  {emoji:"🔥",cat:"밥·찌개",name:"돌솥비빔밥",mood:["ok"],reason:"바닥 누룽지까지 긁어먹는 그 행복, <em>오늘의 당신 것</em>"},
+  {emoji:"🌶️",cat:"밥·찌개",name:"김치찌개",mood:["bad","ok"],reason:"빨간 김치찌개 한 그릇이면 오후 회의도 <em>문제없어</em>"},
+  {emoji:"🍄",cat:"밥·찌개",name:"된장찌개",mood:["ok","good"],reason:"구수하고 든든하게. 오늘도 <em>묵직하게 버텨보자</em>"},
+  {emoji:"🥘",cat:"밥·찌개",name:"부대찌개",mood:["bad","ok"],reason:"오늘은 다 때려넣고 시작하는 날. <em>부대찌개처럼</em>"},
+  {emoji:"🤍",cat:"밥·찌개",name:"순두부찌개",mood:["ok","good"],reason:"부드럽게, 하지만 속은 <em>뜨겁게</em>"},
+  {emoji:"🍖",cat:"밥·찌개",name:"갈비탕",mood:["bad","ok"],reason:"갈비탕 한 그릇은 점심이 아니라 <em>투자야</em>"},
+  {emoji:"🥛",cat:"밥·찌개",name:"설렁탕",mood:["ok","good"],reason:"뽀얀 국물 한 그릇으로 속을 달래주는 <em>어른의 점심</em>"},
+  {emoji:"🍲",cat:"밥·찌개",name:"곰탕",mood:["ok","good"],reason:"말 없이 묵묵하게 끓인 국물. <em>당신 같아서</em> 선택했어"},
+  {emoji:"🫕",cat:"밥·찌개",name:"순대국밥",mood:["bad","ok"],reason:"든든하고 서민적인 당신의 점심. <em>줄 서도 후회 없음</em>"},
+  {emoji:"🌱",cat:"밥·찌개",name:"콩나물국밥",mood:["ok","good"],reason:"해장이 필요한 건 아니지만… <em>그냥 몸이 원하는 날</em>"},
+  {emoji:"🥬",cat:"밥·찌개",name:"쌈밥",mood:["ok","good"],reason:"싸서 먹는 즐거움. 오늘 점심은 <em>내가 포장하는 날</em>"},
+  {emoji:"🔥",cat:"밥·찌개",name:"제육볶음",mood:["bad","ok"],reason:"매콤하게 볶아진 돼지고기처럼 오후도 <em>불태우자</em>"},
+  {emoji:"🍯",cat:"밥·찌개",name:"불고기",mood:["ok","good"],reason:"달콤하고 부드럽게. 오늘만큼은 <em>여유롭게 가자</em>"},
+  {emoji:"🥓",cat:"밥·찌개",name:"삼겹살",mood:["bad","ok"],reason:"삼겹살은 그냥 먹는 게 아니라 <em>충전하는 거야</em>"},
+  {emoji:"🍗",cat:"밥·찌개",name:"닭볶음탕",mood:["bad","ok"],reason:"뼈 발라 먹는 수고로움이 있어야 <em>진짜 맛이지</em>"},
+  {emoji:"💛",cat:"밥·찌개",name:"청국장",mood:["ok","good"],reason:"냄새는 강해도 속은 따뜻하게. <em>오늘 나처럼</em>"},
+  {emoji:"🌊",cat:"밥·찌개",name:"해물뚝배기",mood:["bad","ok"],reason:"바다의 기운을 받아 오후도 <em>시원하게 헤엄쳐가자</em>"},
+  {emoji:"🐔",cat:"튀김·구이",name:"치킨",mood:["bad","ok"],reason:"치킨은 항상 옳다. <em>더 이상의 설명은 필요 없음</em>"},
+  {emoji:"🥩",cat:"튀김·구이",name:"돈까스",mood:["ok"],reason:"두드려 맞아도 맛있어지는 돈까스. <em>오늘의 당신처럼</em>"},
+  {emoji:"🍬",cat:"튀김·구이",name:"탕수육",mood:["bad","ok"],reason:"부먹이든 찍먹이든 오늘만큼은 <em>싸우지 말자</em>"},
+  {emoji:"🌶️",cat:"튀김·구이",name:"닭갈비",mood:["bad","ok"],reason:"매콤하게 볶아지면서 더 맛있어지는 거야. <em>당신처럼</em>"},
+  {emoji:"🐟",cat:"튀김·구이",name:"생선구이정식",mood:["ok","good"],reason:"비린내 없이 담백하게. 오늘 하루도 <em>그렇게 가자</em>"},
+  {emoji:"🦆",cat:"튀김·구이",name:"오리구이",mood:["ok"],reason:"겉은 여유롭게, 발은 열심히. <em>오늘의 당신 스타일</em>"},
+  {emoji:"🥢",cat:"튀김·구이",name:"두부김치",mood:["bad","ok"],reason:"두부처럼 부드럽고 김치처럼 강하게. <em>오늘의 나</em>"},
+  {emoji:"❤️",cat:"분식·패스트푸드",name:"떡볶이",mood:["bad","ok"],reason:"매콤달콤한 인생처럼. 오늘도 <em>쫄깃하게 버텨</em>"},
+  {emoji:"🟢",cat:"분식·패스트푸드",name:"김밥",mood:["ok","good"],reason:"한 줄에 인생이 다 들어있어. 오늘도 <em>잘 말려보자</em>"},
+  {emoji:"⚫",cat:"분식·패스트푸드",name:"순대",mood:["bad","ok"],reason:"소금에 찍어 먹는 순대처럼, <em>심플하게 가는 날</em>"},
+  {emoji:"🍕",cat:"분식·패스트푸드",name:"피자",mood:["bad","ok"],reason:"오늘은 조각내서 나눠 먹는 게 <em>정답인 날</em>"},
+  {emoji:"🍔",cat:"분식·패스트푸드",name:"햄버거",mood:["bad","ok"],reason:"빠르게 먹고 빠르게 충전. <em>오후도 빠르게 달려</em>"},
+  {emoji:"🥪",cat:"분식·패스트푸드",name:"샌드위치",mood:["ok","good"],reason:"가볍게 먹고 가볍게 움직이자. <em>오늘의 모토</em>"},
+  {emoji:"🌯",cat:"분식·패스트푸드",name:"부리또",mood:["ok"],reason:"꽉 채워 싸맨 부리또처럼 오늘도 <em>알차게 채워보자</em>"},
+  {emoji:"🌭",cat:"분식·패스트푸드",name:"핫도그",mood:["bad","ok"],reason:"간단하지만 확실한 만족. <em>오늘 점심의 진리</em>"},
+  {emoji:"🥗",cat:"건강식·기타",name:"샐러드",mood:["good"],reason:"내 몸에게 미안했던 날들을 <em>오늘 하루 갚아보자</em>"},
+  {emoji:"🍣",cat:"건강식·기타",name:"초밥·스시",mood:["ok","good"],reason:"하나하나 정성스럽게. 오늘 오후도 <em>그렇게 하면 돼</em>"},
+  {emoji:"🍝",cat:"건강식·기타",name:"파스타",mood:["ok","good"],reason:"알덴테처럼 딱 적당하게. 오늘도 <em>그렇게만 해</em>"},
+  {emoji:"🌶️",cat:"건강식·기타",name:"마라탕",mood:["bad"],reason:"입을 마비시키면 스트레스도 <em>같이 마비됨</em>"},
+  {emoji:"🌺",cat:"건강식·기타",name:"포케",mood:["good"],reason:"하와이 직장인처럼 오늘 하루 <em>여유롭게 가보자</em>"},
+  {emoji:"🐟",cat:"건강식·기타",name:"연어덮밥",mood:["ok","good"],reason:"빠르고 맛있게. 오늘 점심은 <em>효율이 최고야</em>"},
+  {emoji:"🥩",cat:"건강식·기타",name:"소고기덮밥",mood:["ok"],reason:"도쿄 직장인도 이렇게 먹었어. <em>나쁠 리 없잖아</em>"},
+  {emoji:"🌸",cat:"건강식·기타",name:"두부정식",mood:["good"],reason:"조용하고 담백하게. <em>오늘 나한테 잘하는 날</em>"},
 ];
-
-let flipped = false;
-let current = null;
-let used = [];
-
-function pick() {
-  if (used.length >= menus.length) used = [];
-  let idx;
-  do { idx = Math.floor(Math.random() * menus.length); } while (used.includes(idx));
-  used.push(idx);
-  return menus[idx];
-}
-
-function flipCard() {
-  if (flipped) return;
-  flipped = true;
-  current = pick();
-  document.getElementById('mEmoji').textContent = current.emoji;
-  document.getElementById('mCat').textContent = current.cat;
-  document.getElementById('mName').textContent = current.name;
-  document.getElementById('mReason').innerHTML = current.reason;
-  document.getElementById('scene').classList.add('flipped');
-  spawnParticles();
-}
-
-function resetCard() {
-  flipped = false;
-  document.getElementById('scene').classList.remove('flipped');
-  document.getElementById('particles').innerHTML = '';
-}
-
-function spawnParticles() {
-  const c = document.getElementById('particles');
-  c.innerHTML = '';
-  const items = ['🍜','🍱','🍗','🍕','🥗','🍣','✨','🎉','🍔','🍜'];
-  for (let i = 0; i < 10; i++) {
-    const el = document.createElement('div');
-    el.className = 'particle';
-    el.textContent = items[Math.floor(Math.random() * items.length)];
-    el.style.left = (5 + Math.random() * 90) + '%';
-    el.style.top = (40 + Math.random() * 50) + '%';
-    el.style.animationDelay = (Math.random() * 0.5) + 's';
-    c.appendChild(el);
-  }
-}
-
-function shareIt() {
-  if (!current) { alert('먼저 메뉴를 뽑아주세요!'); return; }
-  const msg = '[오늘의 점심] ' + current.emoji + ' ' + current.name + '\n' + current.reason.replace(/<[^>]+>/g,'') + '\n#오늘뭐먹지';
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(msg).then(() => alert('메뉴가 클립보드에 복사됐어요! 동료에게 붙여넣기 하세요 😄'));
-  } else { alert(msg); }
-}
+const MOOD_LABEL={bad:{txt:"꿀꿀한 날엔 자극적으로",cls:"bad"},ok:{txt:"무난한 오늘엔 다양하게",cls:"ok"},good:{txt:"기분 좋은 날엔 가볍게",cls:"good"}};
+let mood=null,excCat=null,flipped=false,current=null,pool=[],usedIdx=[];
+function selMood(m){mood=m;['bad','ok','good'].forEach(x=>document.getElementById('m-'+x).classList.remove('sel'));document.getElementById('m-'+m).classList.add('sel');document.getElementById('btn1').disabled=false;}
+function selCat(c){excCat=c;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('sel'));document.getElementById('c-'+c).classList.add('sel');document.getElementById('btn2').disabled=false;}
+function goStep2(){document.getElementById('step1').classList.remove('active');document.getElementById('step2').classList.add('active');document.getElementById('d2').classList.add('on');}
+function goStep3(){buildPool();document.getElementById('step2').classList.remove('active');document.getElementById('step3').classList.add('active');document.getElementById('d3').classList.add('on');const ml=MOOD_LABEL[mood];const excLabel=excCat==='기억안남'?'제한 없음':'어제 '+excCat+' 제외';document.getElementById('filter-info').textContent=ml.txt+' · '+excLabel;}
+function buildPool(){pool=ALL_MENUS.filter(m=>{const moodOk=m.mood.includes(mood);const catOk=excCat==='기억안남'?true:m.cat!==excCat;return moodOk&&catOk;});if(pool.length===0)pool=ALL_MENUS.filter(m=>m.mood.includes(mood));if(pool.length===0)pool=[...ALL_MENUS];usedIdx=[];}
+function pickFromPool(){if(usedIdx.length>=pool.length)usedIdx=[];let idx;do{idx=Math.floor(Math.random()*pool.length);}while(usedIdx.includes(idx));usedIdx.push(idx);return pool[idx];}
+function flipCard(){if(flipped)return;flipped=true;current=pickFromPool();document.getElementById('mEmoji').textContent=current.emoji;document.getElementById('mCat').textContent=current.cat;document.getElementById('mName').textContent=current.name;document.getElementById('mReason').innerHTML=current.reason;const mt=document.getElementById('moodTag');const ml=MOOD_LABEL[mood];mt.className='mood-tag '+ml.cls;mt.textContent=ml.txt;document.getElementById('scene').classList.add('flipped');spawnParticles();}
+function reroll(){if(!flipped){flipCard();return;}current=pickFromPool();document.getElementById('mEmoji').textContent=current.emoji;document.getElementById('mCat').textContent=current.cat;document.getElementById('mName').textContent=current.name;document.getElementById('mReason').innerHTML=current.reason;const mt=document.getElementById('moodTag');const ml=MOOD_LABEL[mood];mt.className='mood-tag '+ml.cls;mt.textContent=ml.txt;spawnParticles();}
+function spawnParticles(){const c=document.getElementById('particles');c.innerHTML='';const items=['🍜','🍱','🍗','🍕','🥗','🍣','✨','🎉'];for(let i=0;i<8;i++){const el=document.createElement('div');el.className='particle';el.textContent=items[Math.floor(Math.random()*items.length)];el.style.left=(5+Math.random()*90)+'%';el.style.top=(40+Math.random()*50)+'%';el.style.animationDelay=(Math.random()*.5)+'s';c.appendChild(el);}}
+function resetAll(){mood=null;excCat=null;flipped=false;current=null;pool=[];usedIdx=[];['bad','ok','good'].forEach(x=>document.getElementById('m-'+x).classList.remove('sel'));document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('sel'));document.getElementById('btn1').disabled=true;document.getElementById('btn2').disabled=true;document.getElementById('scene').classList.remove('flipped');document.getElementById('particles').innerHTML='';['d1','d2','d3'].forEach(d=>document.getElementById(d).classList.remove('on'));document.getElementById('d1').classList.add('on');document.getElementById('step3').classList.remove('active');document.getElementById('step2').classList.remove('active');document.getElementById('step1').classList.add('active');}
+function shareIt(){if(!current){alert('먼저 메뉴를 뽑아주세요!');return;}const msg='[오늘의 점심] '+current.emoji+' '+current.name+'\n'+current.reason.replace(/<[^>]+>/g,'')+'\n#오늘뭐먹지';if(navigator.clipboard){navigator.clipboard.writeText(msg).then(()=>alert('클립보드에 복사됐어요 😄'));}else{alert(msg);}}
 </script>
 </body>
 </html>
